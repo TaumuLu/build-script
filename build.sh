@@ -13,6 +13,7 @@ echo "Current directory name: $CURRENT_DIR"
 # 定义变量
 DOCKER_IMAGE="${1:-$CURRENT_DIR}"
 DOCKER_TAG="${2:-latest}"
+DOCKER_PORT="${3:-8080}"
 # DOCKER_REGISTRY="my-docker-registry.com"  # Docker Registry 地址（如果使用私有 registry）
 
 # 检查必需参数
@@ -52,7 +53,7 @@ echo "Docker cleanup completed."
 docker build --no-cache -t $DOCKER_IMAGE:$DOCKER_TAG .
 
 # 运行新的 Docker 容器
-docker run -d -p 8080:80 --name $DOCKER_IMAGE $DOCKER_IMAGE:$DOCKER_TAG
+docker run -d -p $DOCKER_PORT:80 --name $DOCKER_IMAGE $DOCKER_IMAGE:$DOCKER_TAG
 
 # 如果需要推送 Docker 镜像到 Docker Registry
 # docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG
