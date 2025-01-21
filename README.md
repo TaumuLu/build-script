@@ -2,7 +2,7 @@
 
 ## use
 
-```
+```bash
 DOCKER_IMAGE=''
 DOCKER_TAG=''
 CF_API_TOKEN=''
