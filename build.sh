@@ -11,10 +11,42 @@ CURRENT_DIR=$(basename $(pwd))
 echo "Current directory name: $CURRENT_DIR"
 
 # 定义变量
-DOCKER_IMAGE="${1:-$CURRENT_DIR}"
-DOCKER_TAG="${2:-latest}"
-HOST_PORT="${3:-8080}"
-CONTAINER_PORT="${4:-80}"
+DOCKER_IMAGE="$CURRENT_DIR"
+DOCKER_TAG="latest"
+DOCKER_PORT=8080:80
+
+# 读取命令行参数
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    -t)
+      if [[ -n "$2" && ! "$2" =~ ^- ]]; then
+          DOCKER_TAG="$2"
+          shift 2
+      else
+          shift
+      fi
+      ;;
+    -p)
+      if [[ -n "$2" && ! "$2" =~ ^- ]]; then
+          DOCKER_PORT="$2"
+          shift 2
+      else
+          shift
+      fi
+      ;;
+    *)
+      DOCKER_IMAGE="$1"
+      shift
+      ;;
+  esac
+done
+
+echo "---------------------"
+echo "image: $DOCKER_IMAGE"
+echo "tag: $DOCKER_TAG"
+echo "prot: $DOCKER_PORT"
+echo "---------------------"
+
 # DOCKER_REGISTRY="my-docker-registry.com"  # Docker Registry 地址（如果使用私有 registry）
 
 # 检查必需参数
@@ -26,13 +58,13 @@ for param in DOCKER_IMAGE DOCKER_TAG; do
 done
 
 
-# # 切换到工作目录
-# if [ -z "$WORKSPACE" ]; then
-#   echo "WORKSPACE 变量不存在，使用当前目录"
-#   WORKSPACE=$(pwd)  # 如果 WORKSPACE 不存在，使用当前目录
-# else
-#   echo "WORKSPACE 变量存在，目录为: $WORKSPACE"
-# fi
+# 切换到工作目录
+if [ -z "$WORKSPACE" ]; then
+  echo "WORKSPACE 变量不存在，使用当前目录"
+  WORKSPACE=$(pwd)  # 如果 WORKSPACE 不存在，使用当前目录
+else
+  echo "WORKSPACE 变量存在，目录为: $WORKSPACE"
+fi
 
 docker --version
 
@@ -54,7 +86,7 @@ echo "Docker cleanup completed."
 docker build --no-cache -t $DOCKER_IMAGE:$DOCKER_TAG .
 
 # 运行新的 Docker 容器
-docker run -d -p $HOST_PORT:$CONTAINER_PORT --name $DOCKER_IMAGE $DOCKER_IMAGE:$DOCKER_TAG
+docker run -d -p $DOCKER_PORT --name $DOCKER_IMAGE $DOCKER_IMAGE:$DOCKER_TAG
 
 # 如果需要推送 Docker 镜像到 Docker Registry
 # docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG
